@@ -26,7 +26,7 @@ final class Task: Object {
     dynamic var completed = false
 }
 
-class ViewController: UIViewController {
+class ViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +35,7 @@ class ViewController: UIViewController {
     
     func setupUI() {
         title = "My Tasks"
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
 
 }
