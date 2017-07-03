@@ -36,13 +36,14 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(add))
         setupRealm()
     }
     
     func setupUI() {
         title = "My Tasks"
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(add))
+        navigationItem.leftBarButtonItem = editButtonItem
     }
     
     func setupRealm() {
@@ -88,6 +89,36 @@ class ViewController: UITableViewController {
         cell.textLabel?.text = item.text
         cell.textLabel?.alpha = item.completed ? 0.5:1
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        try! items.realm?.write {
+            items.move(from: sourceIndexPath.row, to: destinationIndexPath.row)
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            try! realm.write {
+                let item = items[indexPath.row]
+                realm.delete(item)
+            }
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = items[indexPath.row]
+        try! item.realm?.write {
+            item.completed = !item.completed
+            let destinationIndexPath: IndexPath
+            if item.completed {
+                destinationIndexPath = IndexPath(row: (items.count)-1, section: 0)
+            } else {
+                let completedCount = items.filter("completed = true").count
+                destinationIndexPath = IndexPath(row:((items.count)-completedCount)-1, section: 0)
+            }
+            items.move(from: indexPath.row, to: destinationIndexPath.row)
+        }
     }
     
     //MARK: functions
