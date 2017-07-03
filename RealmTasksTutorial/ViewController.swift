@@ -33,7 +33,7 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        items.append(Task(value: ["text":"My first task"]))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(add))
     }
     
     func setupUI() {
@@ -52,6 +52,22 @@ class ViewController: UITableViewController {
         cell.textLabel?.text = item.text
         cell.textLabel?.alpha = item.completed ? 0.5:1
         return cell
+    }
+    
+    //MARK: functions
+    func add() {
+        let alertController = UIAlertController(title: "New Task", message: "Enter Task Name", preferredStyle: .alert)
+        var alertTextField: UITextField!
+        alertController.addTextField { textField in
+            alertTextField = textField
+            textField.placeholder = "Task Name"
+        }
+        alertController.addAction(UIAlertAction(title: "Add", style: .default) { _ in
+            guard let text = alertTextField.text, !text.isEmpty else { return }
+            self.items.append(Task(value: ["text": text]))
+            self.tableView.reloadData()
+        })
+        present(alertController, animated: true, completion: nil)
     }
 
 }
